@@ -1,13 +1,17 @@
-# Ignore datasets
-data/
-*.csv
-*.xls
-*.xlsx
+# Data
+MEMD_audio/
+archive*/
+*.zip
 
-# Python stuff
+# Models
+*.pth
+*.pt
+
+# Python
 __pycache__/
+
+# Jupyter
 .ipynb_checkpoints/
 
-# environments
-.env
-venv/
+# OS
+.DS_Store
