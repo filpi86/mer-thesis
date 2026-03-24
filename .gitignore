@@ -1,17 +1,14 @@
-# Data
-MEMD_audio/
-archive*/
-*.zip
+# Ignore EVERYTHING
+*
 
-# Models
-*.pth
-*.pt
+# Allow directories (important!)
+!*/
 
-# Python
-__pycache__/
+# Allow specific file types
+!*.ipynb
+!*.py
+!*.md
+!*.html
 
-# Jupyter
-.ipynb_checkpoints/
-
-# OS
-.DS_Store
+# Allow gitignore itself
+!.gitignore

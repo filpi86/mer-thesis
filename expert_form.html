@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <title>Form</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                max-width: 800px;
+                margin: 40px auto;
+                padding: 20px;
+                line-height: 1.6;    
+            }
+
+            .card{
+                border: 1px solid #ccc;
+                border-radius: 10px;
+                padding: 20px;
+                margin-top: 20px;
+            }
+
+            .row {
+                margin-bottom: 15px;
+            }
+
+            label {
+                font-weight: bold;
+                display: block;
+                margin-bottom: 5px;
+            }
+
+            select, button {
+                padding: 8px;
+                font-size: 16px;
+            }
+
+            .topbar {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 20px;
+            }
+
+            .hidden {
+                display: none;
+            }
+
+            a {
+                word-break: break-word;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Song Annotation form</h1>
+        <p>Rate each song on:</p>
+        <ul>
+            <li><strong>Valence (How positive or negative the song feels)</strong>0 -> very negative, 10 -> very positive</li>
+            <li><strong>Arousal (How energetic or calm the song feels)</strong>0 -> very calm, 10 -> very energetic</li>
+        </ul>
+
+        <p id="progress"></p>
+
+        <div id="form-container" class="card hidden">
+            <div class="row">
+                <label>Artist</label>
+            <div id="artist"></div>
+          </div>
+
+          <div class="row">
+            <label>Title</label>
+            <div id="title"></div>
+            </div>
+
+            <div class="row">
+                <label>Link</label>
+                <a id="music_url" href="#" target="_blank">Open song</a>
+            </div>
+
+            <div class="row">
+                <label for="valence">Valence</label>
+                <select id="valence">
+                    <option value="">Select valence</option>
+                </select>
+            </div>
+
+            <div class="row">
+                <label for="arousal">Arousal</label>
+                <select id="arousal">
+                    <option value="">Select arousal</option>
+                </select>
+            </div>
+
+            <button id="back-btn" type="button">Back</button>
+            <button id="skip-btn" type="button">Skip</button>
+            <button id="next-btn" type="button">Next</button>
+        </div>
+
+        <div id="done-container" class="hidden">
+            <h2>Done!</h2>
+            <p>All songs have been rated. Thank you for your participation!</p>
+            <button id="download-btn">Download Results</button>
+        </div>
+
+        <script>
+            const songs = [{
+    "id": "S001",
+    "artist": "Trippie Redd",
+    "title": "Hate Me (feat. YoungBoy Never Broke Again)",
+    "music_url": "https://music.apple.com/us/album/hate-me-feat-youngboy-never-broke-again/1504530666?i=1504531257",
+    "valence": "",
+    "arousal": ""
+  },
+  {
+    "id": "S002",
+    "artist": "Ariana Grande",
+    "title": "main thing",
+    "music_url": "https://open.spotify.com/track/63WsFFnQ8CL941iZBELYsX?si=-UxUfRCTTeWHRDqnFCtssw",
+    "valence": "",
+    "arousal": ""
+  },
+  {
+    "id": "S003",
+    "artist": "The Temptations",
+    "title": "Silent Night",
+    "music_url": "https://open.spotify.com/track/2mtm0aF6c7Yd66sFaE3ipu?si=PijXTA-US4uRG5HC4tXJUg",
+    "valence": "",
+    "arousal": ""
+  },
+  {
+    "id": "S004",
+    "artist": "tasha bloom",
+    "title": "You Don't Own Me",
+    "music_url": "https://open.spotify.com/track/1g8Dz1ntaaMd2fdvlWbeu1?si=kMc7CgcjT0ukynuvBxCR9Q&dl_branch=1",
+    "valence": "",
+    "arousal": ""
+  },
+  {
+    "id": "S005",
+    "artist": "Ariana Grande",
+    "title": "R.E.M",
+    "music_url": "https://open.spotify.com/track/1xWH8zYtDeS9mW1JJG23VZ?si=jK0zrSs0RKedWkL8NZB7bw",
+    "valence": "",
+    "arousal": ""
+  },
+  {
+    "id": "S006",
+    "artist": "Lil Jon & The East Side Boyz",
+    "title": "Can't Stop Pimpin",
+    "music_url": "https://music.apple.com/us/album/cant-stop-pimpin/334933652?i=334934174",
+    "valence": "",
+    "arousal": ""
+  },
+  {
+    "id": "S007",
+    "artist": "Mitski",
+    "title": "Old Friend",
+    "music_url": "https://open.spotify.com/track/5wmn1zWhSSDLUmLLwYO9Rj?si=6gCT560ARQiFoJQHfOc4iQ",
+    "valence": "",
+    "arousal": ""
+  },
+  {
+    "id": "S008",
+    "artist": "Bruno Mars",
+    "title": "Smokin Out The Window",
+    "music_url": "https://open.spotify.com/track/4iN16F8JtVxG2UTzp3avGl?si=CU1YIau7QJ6X8HHrm-377g",
+    "valence": "",
+    "arousal": ""
+  },
+  {
+    "id": "S009",
+    "artist": "Taylor Swift",
+    "title": "Mr. Perfectly Fine (Taylor’s Version) (From The Vault)",
+    "music_url": "https://open.spotify.com/track/7l2tmgUhV7Y2aJHjiszifg?si=vgOGyhGHSn6anXkAxv3N3A",
+    "valence": "",
+    "arousal": ""
+  },
+  {
+    "id": "S010",
+    "artist": "Lady Gaga",
+    "title": "Stupid Love",
+    "music_url": "https://open.spotify.com/track/7yBbV2k2S2uhaQc24NF2xt?si=m9tKr_bsSY-x54j2PRTxGg",
+    "valence": "",
+    "arousal": ""
+  },
+  {
+    "id": "S011",
+    "artist": "Nicki Minaj",
+    "title": "All Things Go",
+    "music_url": "https://open.spotify.com/track/4Kpjrzb1cBImDVrwfeIDG0?dl_branch=1&si=sz07qNkhTvyoJvmQqZX7fw",
+    "valence": "",
+    "arousal": ""
+  },
+  {
+    "id": "S012",
+    "artist": "JoJo",
+    "title": "Weak - 2018",
+    "music_url": "https://open.spotify.com/track/4YZaLNrZgiEztlf4TLMJuD?si=wQUBSfWsQvWtCLwjj5kUCQ",
+    "valence": "",
+    "arousal": ""
+  },
+  {
+    "id": "S013",
+    "artist": "Loza Alexander",
+    "title": "Let's Go Brandon - Extended Version",
+    "music_url": "https://open.spotify.com/track/2zKqguNqwUMWaUTxWVY0eu?si=Cjy-tnx8QhiITGesqTaLhw&utm_source=copy-link",
+    "valence": "",
+    "arousal": ""
+  },
+  {
+    "id": "S014",
+    "artist": "Pi'erre Bourne",
+    "title": "42",
+    "music_url": "https://music.apple.com/us/album/42/1570692192?i=1570692203",
+    "valence": "",
+    "arousal": ""
+  },
+  {
+    "id": "S015",
+    "artist": "Tomi Agape",
+    "title": "London",
+    "music_url": "https://open.spotify.com/track/4HdBZinWFY8UZ25kdXlB0X?si=4tU2IYnXSqG0P_eXwy70_A",
+    "valence": "",
+    "arousal": ""
+  },
+  {
+    "id": "S016",
+    "artist": "The Neighbourhood",
+    "title": "Sweater Weather",
+    "music_url": "https://music.apple.com/us/album/sweater-weather/635016635?i=635016640",
+    "valence": "",
+    "arousal": ""
+  },
+  {
+    "id": "S017",
+    "artist": "Logic",
+    "title": "The Glorious Five",
+    "music_url": "https://open.spotify.com/track/066QkK1heGoXBUPBbcOhEG?si=Wl39CaDfR9-v3x-RrfDpoQ",
+    "valence": "",
+    "arousal": ""
+  },
+  {
+    "id": "S018",
+    "artist": "Sidney Gish",
+    "title": "Not but for You, Bunny",
+    "music_url": "https://open.spotify.com/track/2J2kGyvyVyOKEJgBCPE1oO?si=aNWEs56DRhqxxNU2kOVlmQ&utm_source=copy-link&dl_branch=1",
+    "valence": "",
+    "arousal": ""
+  },
+  {
+    "id": "S019",
+    "artist": "Vintonic",
+    "title": "I Want You Back",
+    "music_url": "https://open.spotify.com/track/75X3pfJpitMQzGVOWEz771?si=l834c1MCRZ2yQJGRnxpiUQ",
+    "valence": "",
+    "arousal": ""
+  },
+  {
+    "id": "S020",
+    "artist": "Gallant",
+    "title": "Relapse.",
+    "music_url": "https://open.spotify.com/track/20qBANY9QVPWvZGsn97t9H?si=jRmVQosrSHewEFU4d3W7Pw&dl_branch=1",
+    "valence": "",
+    "arousal": ""
+  },
+  {
+    "id": "S021",
+    "artist": "Bryson Tiller",
+    "title": "Inhale",
+    "music_url": "https://music.apple.com/us/album/inhale/1533349969?i=1533349984",
+    "valence": "",
+    "arousal": ""
+  },
+  {
+    "id": "S022",
+    "artist": "Tinashe",
+    "title": "Bouncin",
+    "music_url": "https://open.spotify.com/track/6sHgMLiwXXCbg2AbkzQAWK?si=XRTGv8RITnS8FvZClnZHWw",
+    "valence": "",
+    "arousal": ""
+  },
+  {
+    "id": "S023",
+    "artist": "The Knocks",
+    "title": "Classic (feat. POWERS)",
+    "music_url": "https://open.spotify.com/track/42TrdbXsmLybxUGJczYbrJ?si=W0dsV3L7TaiHtPG4X_dTyQ&context=spotify%3Aplaylist%3A1uXY4rsvmtRbKBcfmNON8U",
+    "valence": "",
+    "arousal": ""
+  },
+  {
+    "id": "S024",
+    "artist": "BØRNS",
+    "title": "God Save Our Young Blood (with Lana Del Rey)",
+    "music_url": "https://open.spotify.com/track/69bW8sXMYTa2iwfoRyZT5Y?context=spotify%3Aplaylist%3A7AR8QfzYvwod9cr0bmuDAt&si=3SdttbM4ScOlV0LXWUE-OQ",
+    "valence": "",
+    "arousal": ""
+  },
+  {
+    "id": "S025",
+    "artist": "Jill Scott",
+    "title": "The Way",
+    "music_url": "https://music.apple.com/ca/album/the-way/1436647749?i=1436648231",
+    "valence": "",
+    "arousal": ""
+  },
+  {
+    "id": "S026",
+    "artist": "Rejjie Snow",
+    "title": "ACID TRIP",
+    "music_url": "https://open.spotify.com/track/7Es2OBtD2DPHfz6gqSWH8Z?si=b26739ebcb5d4e90",
+    "valence": "",
+    "arousal": ""
+  },
+  {
+    "id": "S027",
+    "artist": "Kota the Friend",
+    "title": "Long Beach",
+    "music_url": "https://open.spotify.com/track/6tqIes4TjudsjfIpK4P2Jh?si=lYP_Xd88Rpmxpx0wqv7COw",
+    "valence": "",
+    "arousal": ""
+  },
+  {
+    "id": "S028",
+    "artist": "Bladee",
+    "title": "It Suxx",
+    "music_url": "https://open.spotify.com/track/46DROGTCCafpOnu7MRcbQ9?si=5DcA0q5PT1-rUsY19wheRA",
+    "valence": "",
+    "arousal": ""
+  },
+  {
+    "id": "S029",
+    "artist": "We Are The Night",
+    "title": "Summer Fiction",
+    "music_url": "https://open.spotify.com/track/5m0Kh463vX2lqta6hZmyN1?si=Fg__AcDNT_aYsYt8eV1slA",
+    "valence": "",
+    "arousal": ""
+  },
+  {
+    "id": "S030",
+    "artist": "Dizzee Rascal",
+    "title": "Bonkers",
+    "music_url": "https://open.spotify.com/track/6ddQ5KCkvCggk3j6KdA0zL?si=QxhMDVu2SJuwkN4ecmC8zQ",
+    "valence": "",
+    "arousal": ""
+  },
+  {
+    "id": "S031",
+    "artist": "Eric Nam",
+    "title": "I Don't Know You Anymore",
+    "music_url": "https://open.spotify.com/track/4Z4FusIyks3EQfscAFslWj?si=Bkqu4XxHSCmI4tQ1QrjlJw&utm_source=copy-link",
+    "valence": "",
+    "arousal": ""
+  },
+  {
+    "id": "S032",
+    "artist": "The Decemberists",
+    "title": "Sucker's Prayer",
+    "music_url": "https://open.spotify.com/track/3pxhPssdL2SJObXb5hpCRu?si=KY9gwICIQROkQZ3UgXDsBQ&dl_branch=1",
+    "valence": "",
+    "arousal": ""
+  },
+  {
+    "id": "S033",
+    "artist": "Westside Gunn",
+    "title": "Elizabeth",
+    "music_url": "https://open.spotify.com/track/6uKj6ta8izO0VLnIG14lf3?si=yISqT4WvQrq-gPv784Mz2A&utm_source=copy-link",
+    "valence": "",
+    "arousal": ""
+  },
+  {
+    "id": "S034",
+    "artist": "Paolo Sandejas",
+    "title": "Different Shade of Blue",
+    "music_url": "https://open.spotify.com/track/4TfTHd6vzdJwETRmfKK7pB?si=9wrOfQnOT1uIH7E5jrXLrQ&utm_source=copy-link",
+    "valence": "",
+    "arousal": ""
+  },
+  {
+    "id": "S035",
+    "artist": "Dante Levo",
+    "title": "Before The Storm",
+    "music_url": "https://open.spotify.com/track/1uK3maf390iI8jlbAcAN1H?si=Pxi254H5SEq6KdKOP_n0KQ",
+    "valence": "",
+    "arousal": ""
+  },
+  {
+    "id": "S036",
+    "artist": "COIN",
+    "title": "Youuu",
+    "music_url": "https://open.spotify.com/track/0xORFaXxl07BtES8IAJ7OD?si=aa7dc8368fab4b86",
+    "valence": "",
+    "arousal": ""
+  },
+  {
+    "id": "S037",
+    "artist": "Vampire Weekend",
+    "title": "2021",
+    "music_url": "https://open.spotify.com/track/6UryEVkqPDLliZOG4UmFi9?si=on7hUjMATgGpe8h-muOY7Q",
+    "valence": "",
+    "arousal": ""
+  },
+  {
+    "id": "S038",
+    "artist": "Björk",
+    "title": "Like Someone In Love",
+    "music_url": "https://open.spotify.com/track/61QEkw7VnsH9kWUm1Zjunq?si=7qn3INOeSvehb3sWWzlQrQ",
+    "valence": "",
+    "arousal": ""
+  },
+  {
+    "id": "S039",
+    "artist": "Dizzee Rascal",
+    "title": "Can't Tek No More",
+    "music_url": "https://open.spotify.com/track/3drYbo62Fho1GYmKo0Thzd?si=947ncc0cT1iQ7y881sFh6g",
+    "valence": "",
+    "arousal": ""
+  },
+  {
+    "id": "S040",
+    "artist": "Yellowcard",
+    "title": "Date Line (I Am Gone)",
+    "music_url": "https://open.spotify.com/track/45fYGOOUNVgWhBj2kAK4OI?si=afbe5b1a2442429b",
+    "valence": "",
+    "arousal": ""
+  },
+  {
+    "id": "S041",
+    "artist": "Aaliyah",
+    "title": "4 Page Letter",
+    "music_url": "https://open.spotify.com/track/0UbqhKfoV4vzoMkdJD4gry?si=Ymtm1xFqTuWJLQ9FnKrgZg",
+    "valence": "",
+    "arousal": ""
+  },
+  {
+    "id": "S042",
+    "artist": "Crystal Lake",
+    "title": "Watch Me Burn",
+    "music_url": "https://open.spotify.com/track/1y8EEqXNbi7LtBpPLMPRui?si=-7045WmQSYiBKU2zRloGmA",
+    "valence": "",
+    "arousal": ""
+  },
+  {
+    "id": "S043",
+    "artist": "ADOY",
+    "title": "Lemon",
+    "music_url": "https://open.spotify.com/track/1I7LDTkosplUNc69ISjKJs?si=39I5s4BoT7ytX6vhamG-Ow&utm_source=copy-link",
+    "valence": "",
+    "arousal": ""
+  },
+  {
+    "id": "S044",
+    "artist": "03 Greedo",
+    "title": "Dear Winter",
+    "music_url": "https://soundcloud.com/03greedo/dear-winter",
+    "valence": "",
+    "arousal": ""
+  },
+  {
+    "id": "S045",
+    "artist": "Lil Mariko",
+    "title": "Don't Touch",
+    "music_url": "https://open.spotify.com/track/4lbiIzTsYUT1Kz3KOtQn1b?si=BVyhhhjFSGCQgBFEC1x6FA&utm_source=copy-link&context=spotify%3Aplaylist%3A37i9dQZF1EpjcfYvqGAIKQ",
+    "valence": "",
+    "arousal": ""
+  },
+  {
+    "id": "S046",
+    "artist": "BTS",
+    "title": "Dynamite",
+    "music_url": "https://open.spotify.com/track/4saklk6nie3yiGePpBwUoc?si=n1Zakr2bS4qEfcnFtkB85Q",
+    "valence": "",
+    "arousal": ""
+  },
+  {
+    "id": "S047",
+    "artist": "Drake",
+    "title": "Jungle",
+    "music_url": "https://music.apple.com/us/album/jungle/1440839718?i=1440840661",
+    "valence": "",
+    "arousal": ""
+  },
+  {
+    "id": "S048",
+    "artist": "Gyptian",
+    "title": "Hold You - Hold Yuh",
+    "music_url": "https://open.spotify.com/track/0j55p8YRAPG8yajtNyjt6A?si=nOXU47IAT6Ob3DuCd1ivrA",
+    "valence": "",
+    "arousal": ""
+  },
+  {
+    "id": "S049",
+    "artist": "Brian Brown",
+    "title": "The Dreamer's Anthem",
+    "music_url": "https://open.spotify.com/track/1Ve5LHFSiGMFDZlYaidkEP?si=EZjmxzhGSj-YuPQZG14EQA",
+    "valence": "",
+    "arousal": ""
+  },
+  {
+    "id": "S050",
+    "artist": "Madonna",
+    "title": "Over and Over",
+    "music_url": "https://open.spotify.com/track/0uIqV0X1M1vjti0ubMOInt?si=KVsyx-z7R06-8x1KsydKsg",
+    "valence": "",
+    "arousal": ""
+  }];
+
+            const progressStorageKey = 'annotation_progress';
+  
+            let currentIndex = 0;
+            let results = [];
+            let reviewMode = false;
+
+            const progressEl = document.getElementById('progress');
+            const formContainer = document.getElementById('form-container');
+            const doneContainer = document.getElementById('done-container');
+
+            const artistEl = document.getElementById('artist');
+            const titleEl = document.getElementById('title');
+            const musicUrlEl = document.getElementById('music_url');
+            const valenceEl = document.getElementById('valence');
+            const arousalEl = document.getElementById('arousal');
+            const backBtn = document.getElementById('back-btn');
+            const skipBtn = document.getElementById('skip-btn');
+            const nextBtn = document.getElementById('next-btn');
+            const downloadBtn = document.getElementById('download-btn');
+
+            for (let i = 0; i <= 9; i++) {
+                const valenceOption = document.createElement('option');
+                valenceOption.value = i;
+                valenceOption.textContent = i;
+                valenceEl.appendChild(valenceOption);
+
+                const arousalOption = document.createElement('option');
+                arousalOption.value = i;
+                arousalOption.textContent = i;
+                arousalEl.appendChild(arousalOption);
+            }
+
+            function saveProgress() {
+              localStorage.setItem(progressStorageKey, JSON.stringify({
+                currentIndex: currentIndex,
+                results: results,
+                reviewMode: reviewMode
+              }));
+            }
+
+            function showDoneState() {
+              formContainer.classList.add('hidden');
+              doneContainer.classList.remove('hidden');
+              progressEl.textContent = `Completed ${songs.length} of ${songs.length}`;
+            }
+
+            function completeAnnotation() {
+              currentIndex = songs.length;
+              reviewMode = false;
+              saveProgress();
+              showDoneState();
+            }
+
+            function isClassified(result) {
+              return result && result.valence !== "" && result.arousal !== "";
+            }
+
+            function findFirstUnclassifiedIndex() {
+              for (let i = 0; i < songs.length; i++) {
+                if (!isClassified(results[i])) {
+                  return i;
+                }
+              }
+
+              return -1;
+            }
+
+            function findNextUnclassifiedIndex(startIndex) {
+              for (let offset = 0; offset < songs.length; offset++) {
+                const index = (startIndex + offset) % songs.length;
+
+                if (!isClassified(results[index])) {
+                  return index;
+                }
+              }
+
+              return -1;
+            }
+
+            function recordResult(valence, arousal) {
+              const song = songs[currentIndex];
+
+              results[currentIndex] = {
+                id: song.id,
+                artist: song.artist,
+                title: song.title,
+                music_url: song.music_url,
+                valence: valence === "" ? "" : Number(valence),
+                arousal: arousal === "" ? "" : Number(arousal)
+              };  
+            }
+
+            function goToNextSong() {
+              if (reviewMode) {
+                const nextUnclassifiedIndex = findNextUnclassifiedIndex(currentIndex + 1);
+
+                if (nextUnclassifiedIndex !== -1) {
+                  currentIndex = nextUnclassifiedIndex;
+                  saveProgress();
+                  renderSong();
+                  return;
+                }
+
+                completeAnnotation();
+                return;
+              }
+
+              currentIndex++;
+
+              if (currentIndex < songs.length) {
+                saveProgress();
+                renderSong();
+              } else {
+                const firstUnclassifiedIndex = findFirstUnclassifiedIndex();
+
+                if (firstUnclassifiedIndex !== -1) {
+                  reviewMode = true;
+                  currentIndex = firstUnclassifiedIndex;
+                  saveProgress();
+                  renderSong();
+                  return;
+                }
+
+                completeAnnotation();
+              }
+            }
+            function init() {
+              const saved = localStorage.getItem(progressStorageKey);
+
+              if (saved) {
+                try {
+                  const data = JSON.parse(saved);
+                  currentIndex = Number.isInteger(data.currentIndex) ? data.currentIndex : 0;
+                  results = Array.isArray(data.results) ? data.results : [];
+                  reviewMode = data.reviewMode === true;
+                } catch (error) {
+                  console.warn('Invalid saved progress. Resetting progress.', error);
+                  localStorage.removeItem(progressStorageKey);
+                  currentIndex = 0;
+                  results = [];
+                  reviewMode = false;
+                }
+
+              }
+                if (!songs.length) {
+                    progressEl.textContent = 'No songs found';
+                    return;
+                }
+
+                if (currentIndex >= songs.length) {
+                    const firstUnclassifiedIndex = findFirstUnclassifiedIndex();
+
+                    if (firstUnclassifiedIndex !== -1) {
+                      reviewMode = true;
+                      currentIndex = firstUnclassifiedIndex;
+                    } else {
+                      showDoneState();
+                      return;
+                    }
+                }
+
+                formContainer.classList.remove('hidden');
+                renderSong();
+            }
+
+            function renderSong() {
+                const song = songs[currentIndex];
+
+                progressEl.textContent = `Song ${currentIndex + 1} of ${songs.length}`;
+                artistEl.textContent = song.artist;
+                titleEl.textContent = song.title;
+                musicUrlEl.href = song.music_url;
+                musicUrlEl.textContent = song.music_url;
+
+                const existingResult = results[currentIndex];
+
+                valenceEl.value = existingResult && existingResult.valence !== "" ? String(existingResult.valence) : "";
+                arousalEl.value = existingResult && existingResult.arousal !== "" ? String(existingResult.arousal) : "";
+                backBtn.disabled = currentIndex === 0;
+            }
+
+            nextBtn.addEventListener('click', () => {
+              const valence = valenceEl.value;
+              const arousal = arousalEl.value;
+
+              if (valence === "" || arousal === "") {
+                alert("Please select both valence and arousal ratings.");
+                return;
+              }
+
+              recordResult(valence, arousal);
+              goToNextSong();
+            });
+
+            backBtn.addEventListener('click', () => {
+              if (currentIndex === 0) {
+                return;
+              }
+
+              currentIndex--;
+              saveProgress();
+              renderSong();
+            });
+
+            skipBtn.addEventListener('click', () => {
+              recordResult("", "");
+              goToNextSong();
+            });
+
+            downloadBtn.addEventListener('click', () => {
+              const exportedResults = songs.map((song, index) => results[index] || {
+                id: song.id,
+                artist: song.artist,
+                title: song.title,
+                music_url: song.music_url,
+                valence:  "",
+                arousal:  ""
+              });
+              
+              const jsonString = JSON.stringify(exportedResults, null, 2);
+              const blob = new Blob([jsonString], { type: 'application/json'});
+              const url = URL.createObjectURL(blob);
+
+              const a = document.createElement('a');
+              a.href = url;
+              a.download = 'expert_annotations.json';
+              a.click();
+
+              localStorage.removeItem(progressStorageKey); 
+              URL.revokeObjectURL(url);
+            });
+
+            init();
+           
+        </script>
+    </body>
+</html>
